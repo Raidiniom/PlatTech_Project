@@ -14,20 +14,19 @@ Deno.serve(async (req) => {
       throw new Error("Missing input credentials -> email or password");
     }
 
-    const { error: logInError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: logInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (logInError) {
-      console.error("Login Error:", logInError);
       return new Response(
         JSON.stringify({ error: logInError.message }),
         { status: 401 }
       );
     }
 
-    return new Response(`Welcome ${email}`);
+    return new Response(`Welcome To VRLR University!!!`+ JSON.stringify(authData));
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "error occurred";
     console.error("Error:", e);

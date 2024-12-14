@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { email, password } = body;
+    const { email, password, name} = body;
 
     if (!email || !password) {
       return new Response(
@@ -26,34 +26,71 @@ Deno.serve(async (req) => {
     }
 
     // Sign up the user
-    try {
-      const { data, error } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
-    
-      if (error) {
-        console.error("Error creating user:", error);
-        return new Response(
-          JSON.stringify({ success: false, message: error.message }),
-          { status: 500, headers: { "Content-Type": "application/json" } }
-        );
-      }
-    
+    const { data: userData, error: errorData } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+  
+    // failed signup response
+    if (errorData) {
+      console.error("Error creating user:", errorData);
       return new Response(
-        JSON.stringify({ success: true, message: "User signed up successfully!", data }),
-        { status: 201, headers: { "Content-Type": "application/json" } }
-      );
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      return new Response(
-        JSON.stringify({ success: false, message: err.message }),
+        JSON.stringify({ success: false, message: errorData.message }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
+
+    // Ensure user metadata has a role
+    const role = userData?.user?.user_metadata?.role;
+    
+    if (role === 'Student') {
+      const { data: studData, error: studError } = await supabase
+      .from("student")
+      .insert({
+        student_id: userData?.user?.id,
+        name: name,
+        email_address: userData?.user?.email,
+      })
+
+      // Check if inserting into the student table was successful
+      if (studError) {
+        console.error("Error inserting into faculty table:", studError);
+        return new Response(
+          JSON.stringify({ success: false, message: studError.message }),
+          { status: 500, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+    } else {
+      const { data: authUser, error: authError } = await supabase
+        .from("faculty")
+        .insert({
+          faculty_id: userData?.user?.id,
+          role: role,
+          email_address: userData?.user?.email,
+        });
+      
+        // Check if inserting into the faculty table was successful
+        if (authError) {
+          console.error("Error inserting into faculty table:", authError);
+          return new Response(
+            JSON.stringify({ success: false, message: authError.message }),
+            { status: 500, headers: { "Content-Type": "application/json" } }
+          );
+        }
+    }
+
+
+    // successful signup response
+    return new Response(
+      JSON.stringify(
+        { success: true, message: "User signed up successfully!", user: userData },
+        { status: 201, headers: { "Content-Type": "application/json" } }
+      )
+    ); 
     
   } catch (err) {
+    console.error("Unexpected error:", err);
     return new Response(
       JSON.stringify({ success: false, message: err.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
