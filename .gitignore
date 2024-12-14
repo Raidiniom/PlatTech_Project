@@ -1,6 +1,7 @@
 .vscode
 .env
 node_modules
-supabase
+supabase/.branches
+supabase/.temp
 *.txt
 *.sql
