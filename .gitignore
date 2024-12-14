@@ -1,4 +1,6 @@
-*.txt
 .vscode
+.env
 node_modules
 supabase
+*.txt
+*.sql
