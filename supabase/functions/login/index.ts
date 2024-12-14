@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response(`Welcome To VRLR University!!!`+ JSON.stringify(authData));
+    return new Response(JSON.stringify(authData));
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "error occurred";
     console.error("Error:", e);
