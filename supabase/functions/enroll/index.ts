@@ -69,8 +69,7 @@ Deno.serve(async (req) => {
   <h1>Welcome, ${name}!</h1>
   <p>We're excited to have you on ${course}. Let's achieve great things together!</p>
 </body>
-</html>
-        
+</html> 
         ` },
       ],
   };

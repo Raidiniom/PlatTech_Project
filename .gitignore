@@ -4,4 +4,3 @@ node_modules
 supabase/.branches
 supabase/.temp
 *.txt
-*.sql
